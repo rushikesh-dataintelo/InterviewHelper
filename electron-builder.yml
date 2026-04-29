@@ -1,0 +1,46 @@
+appId: com.iviewhelper.app
+productName: iViewHelper
+directories:
+  buildResources: build
+  output: dist
+
+files:
+  - '!**/.vscode/*'
+  - '!src/*'
+  - '!electron.vite.config.*'
+  - '!{.env,.env.*,.npmrc}'
+  - '!{tsconfig.json,tsconfig.*.json}'
+
+mac:
+  category: public.app-category.productivity
+  target:
+    - target: dmg
+      arch:
+        - universal
+  darkModeSupport: true
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  hardenedRuntime: true
+  extendInfo:
+    LSUIElement: true
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  artifactName: '${name}-${version}-setup.${ext}'
+
+nsis:
+  oneClick: true
+  allowToChangeInstallationDirectory: false
+  deleteAppDataOnUninstall: true
+
+dmg:
+  contents:
+    - x: 130
+      y: 220
+    - x: 410
+      y: 220
+      type: link
+      path: /Applications

@@ -50,7 +50,7 @@ export function createTray(mainWindow: BrowserWindow): void {
         if (mainWindow.isVisible()) {
           mainWindow.hide()
         } else {
-          mainWindow.show()
+          mainWindow.showInactive()
         }
       }
     },
@@ -69,7 +69,7 @@ export function createTray(mainWindow: BrowserWindow): void {
     if (mainWindow.isVisible()) {
       mainWindow.hide()
     } else {
-      mainWindow.show()
+      mainWindow.showInactive()
     }
   })
 }

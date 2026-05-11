@@ -63,7 +63,7 @@ export function registerShortcuts(mainWindow: BrowserWindow): void {
     if (mainWindow.isVisible()) {
       mainWindow.hide()
     } else {
-      mainWindow.show()
+      mainWindow.showInactive()
     }
   })
 
@@ -87,16 +87,17 @@ export function registerShortcuts(mainWindow: BrowserWindow): void {
     mainWindow.webContents.send('shortcut-clear-input')
   })
 
-  // Focus message input
+  // Focus message input — panel.focus() makes it the key window (receives keystrokes)
+  // without activating the app, so Chrome stays foregrounded.
   globalShortcut.register('CommandOrControl+Shift+E', () => {
-    if (!mainWindow.isVisible()) mainWindow.show()
+    if (!mainWindow.isVisible()) mainWindow.showInactive()
     mainWindow.focus()
     mainWindow.webContents.send('shortcut-focus-input')
   })
 
   // Find in chat
   globalShortcut.register('CommandOrControl+Shift+F', () => {
-    if (!mainWindow.isVisible()) mainWindow.show()
+    if (!mainWindow.isVisible()) mainWindow.showInactive()
     mainWindow.focus()
     mainWindow.webContents.send('shortcut-find-in-chat')
   })

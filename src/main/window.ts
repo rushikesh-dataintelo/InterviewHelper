@@ -19,6 +19,8 @@ export function createStealthWindow(): BrowserWindow {
     hasShadow: false,
     focusable: true,
     show: false,
+    // macOS: NSPanel with nonactivating style mask — receives input without activating the app
+    ...(process.platform === 'darwin' ? { type: 'panel' as const } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       contextIsolation: true,
@@ -30,9 +32,13 @@ export function createStealthWindow(): BrowserWindow {
   // Core stealth: exclude from screen capture
   win.setContentProtection(true)
 
-  // Show when ready to avoid flash
+  // Float over fullscreen apps and across all spaces without stealing focus
+  win.setAlwaysOnTop(true, 'screen-saver')
+  win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })
+
+  // Show without activating to avoid pulling focus from the foreground app
   win.once('ready-to-show', () => {
-    win.show()
+    win.showInactive()
   })
 
   // Load renderer

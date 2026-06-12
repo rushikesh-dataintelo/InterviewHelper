@@ -2,6 +2,10 @@
   "name": "iviewhelper",
   "version": "1.0.0",
   "description": "Stealth AI meeting assistant",
+  "author": {
+    "name": "DataIntelo",
+    "email": "tech@dataintelo.com"
+  },
   "main": "./out/main/index.js",
   "scripts": {
     "dev": "electron-vite dev",

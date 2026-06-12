@@ -37,9 +37,6 @@ linux:
     - target: AppImage
       arch:
         - x64
-    - target: deb
-      arch:
-        - x64
   category: Utility
   maintainer: DataIntelo <tech@dataintelo.com>
   synopsis: Stealth AI meeting assistant

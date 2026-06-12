@@ -28,11 +28,9 @@ jobs:
       - name: Build Linux installers (AppImage + deb)
         run: npm run package:linux
 
-      - name: Upload installers
+      - name: Upload installer
         uses: actions/upload-artifact@v4
         with:
           name: iviewhelper-linux
-          path: |
-            dist/*.AppImage
-            dist/*.deb
+          path: dist/*.AppImage
           if-no-files-found: error

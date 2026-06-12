@@ -13,6 +13,7 @@ export function ChatPanel() {
   const setStreamError = useChatStore(s => s.setStreamError)
   const messages = useChatStore(s => s.messages)
   const apiKey = useSettingsStore(s => s.apiKey)
+  const provider = useSettingsStore(s => s.provider)
   const model = useSettingsStore(s => s.model)
   const reasoningEffort = useSettingsStore(s => s.reasoningEffort)
   const getActivePromptContent = useSettingsStore(s => s.getActivePromptContent)
@@ -62,6 +63,7 @@ export function ChatPanel() {
       model,
       systemPrompt: getActivePromptContent(),
       apiKey,
+      provider,
       reasoningEffort
     })
   }

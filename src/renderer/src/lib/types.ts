@@ -15,6 +15,8 @@ export interface SystemPrompt {
 
 export type STTProvider = 'whisper'
 
+export type Provider = 'openai' | 'groq'
+
 export type ReasoningEffort = 'off' | 'minimal' | 'low' | 'medium' | 'high'
 
 export function modelSupportsReasoning(model: string): boolean {

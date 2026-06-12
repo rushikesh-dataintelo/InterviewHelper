@@ -9,7 +9,8 @@
     "preview": "electron-vite preview",
     "package:mac": "electron-vite build && electron-builder --mac",
     "package:win": "electron-vite build && electron-builder --win",
-    "package:all": "electron-vite build && electron-builder -mw",
+    "package:linux": "electron-vite build && electron-builder --linux",
+    "package:all": "electron-vite build && electron-builder -mwl",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

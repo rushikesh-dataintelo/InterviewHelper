@@ -1,11 +1,21 @@
 import { BrowserWindow } from 'electron'
 import OpenAI, { toFile } from 'openai'
 
-let client: OpenAI | null = null
+const PROVIDER_BASE_URLS: Record<string, string> = {
+  openai: 'https://api.openai.com/v1',
+  groq: 'https://api.groq.com/openai/v1'
+}
 
-function getClient(apiKey: string): OpenAI {
-  if (!client || client.apiKey !== apiKey) {
-    client = new OpenAI({ apiKey })
+let client: OpenAI | null = null
+let currentProvider: string | null = null
+
+function getClient(apiKey: string, provider: string = 'openai'): OpenAI {
+  if (!client || client.apiKey !== apiKey || currentProvider !== provider) {
+    client = new OpenAI({
+      apiKey,
+      baseURL: PROVIDER_BASE_URLS[provider] || PROVIDER_BASE_URLS.openai
+    })
+    currentProvider = provider
   }
   return client
 }
@@ -17,10 +27,18 @@ export async function streamChat(
     model: string;
     systemPrompt: string;
     apiKey: string;
+    provider: string;
     reasoningEffort: 'off' | 'minimal' | 'low' | 'medium' | 'high';
   }
 ): Promise<void> {
-  const openai = getClient(payload.apiKey)
+  const openai = getClient(payload.apiKey, payload.provider)
+
+  // Groq vision is only supported on specific models
+  const GROQ_VISION_MODELS = [
+    'meta-llama/llama-4-scout-17b-16e-instruct',
+    'meta-llama/llama-4-maverick-17b-128e-instruct'
+  ]
+  const supportsVision = payload.provider !== 'groq' || GROQ_VISION_MODELS.includes(payload.model)
 
   const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = []
 
@@ -29,9 +47,17 @@ export async function streamChat(
     messages.push({ role: 'system', content: payload.systemPrompt })
   }
 
-  // Add conversation messages
+  // Add conversation messages, stripping images for non-vision models
   for (const msg of payload.messages) {
-    messages.push(msg as OpenAI.Chat.Completions.ChatCompletionMessageParam)
+    if (!supportsVision && Array.isArray(msg.content)) {
+      const textParts = msg.content
+        .filter((p: { type: string }) => p.type === 'text')
+        .map((p: { text?: string }) => p.text || '')
+        .join('\n')
+      messages.push({ role: msg.role, content: textParts || '[screenshot attached — this model does not support images]' } as OpenAI.Chat.Completions.ChatCompletionMessageParam)
+    } else {
+      messages.push(msg as OpenAI.Chat.Completions.ChatCompletionMessageParam)
+    }
   }
 
   try {
@@ -61,15 +87,16 @@ export async function streamChat(
 
 export async function transcribeAudio(
   audioBuffer: ArrayBuffer,
-  apiKey: string
+  apiKey: string,
+  provider: string = 'openai'
 ): Promise<string> {
-  const openai = getClient(apiKey)
+  const openai = getClient(apiKey, provider)
 
   const buffer = Buffer.from(audioBuffer)
   const file = await toFile(buffer, 'audio.webm', { type: 'audio/webm' })
 
   const response = await openai.audio.transcriptions.create({
-    model: 'whisper-1',
+    model: provider === 'groq' ? 'whisper-large-v3' : 'whisper-1',
     file,
     language: 'en',
     response_format: 'text',
@@ -102,11 +129,6 @@ const HALLUCINATIONS = new Set([
   'music',
   'applause',
   'silence',
-  'you',
-  'so',
-  'okay',
-  'ok',
-  'dont mind me',
   'mm',
   'mmm',
   'hmm',

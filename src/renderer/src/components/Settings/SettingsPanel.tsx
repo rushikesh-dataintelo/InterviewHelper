@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { X, AlertTriangle, Type } from 'lucide-react'
+import { X, AlertTriangle, Type, Server } from 'lucide-react'
 import { useSettingsStore } from '../../stores/settingsStore'
 import { ApiKeyInput } from './ApiKeyInput'
 import { SystemPromptEditor, type SystemPromptEditorHandle } from './SystemPromptEditor'
@@ -17,7 +17,14 @@ export function SettingsPanel() {
   const setShowSettings = useSettingsStore(s => s.setShowSettings)
   const fontSize = useSettingsStore(s => s.fontSize)
   const setFontSize = useSettingsStore(s => s.setFontSize)
+  const provider = useSettingsStore(s => s.provider)
+  const setProvider = useSettingsStore(s => s.setProvider)
   const editorRef = useRef<SystemPromptEditorHandle>(null)
+
+  const PROVIDERS = [
+    { value: 'openai' as const, label: 'OpenAI' },
+    { value: 'groq' as const, label: 'Groq' }
+  ]
 
   if (!showSettings) return null
 
@@ -45,6 +52,31 @@ export function SettingsPanel() {
 
       {/* Content */}
       <div className="flex flex-col gap-5 p-5 overflow-y-auto flex-1">
+        {/* Provider */}
+        <div>
+          <label className="flex items-center gap-1.5 text-xs mb-2 font-medium" style={{ color: 'var(--text-secondary)' }}>
+            <Server size={12} />
+            Provider
+          </label>
+          <div className="flex gap-1.5">
+            {PROVIDERS.map(p => (
+              <button
+                key={p.value}
+                onClick={() => setProvider(p.value)}
+                className="flex-1 text-xs py-1.5 rounded-lg transition-all"
+                style={{
+                  background: provider === p.value ? 'var(--accent)' : 'var(--bg-tertiary)',
+                  color: provider === p.value ? '#fff' : 'var(--text-secondary)',
+                  border: `1px solid ${provider === p.value ? 'var(--accent)' : 'var(--border)'}`,
+                  boxShadow: provider === p.value ? '0 2px 8px rgba(99,102,241,0.3)' : 'none'
+                }}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <ApiKeyInput />
 
         {/* Font Size */}

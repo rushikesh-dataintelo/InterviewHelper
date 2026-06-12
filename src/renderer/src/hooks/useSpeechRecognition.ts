@@ -4,7 +4,7 @@ import { useSettingsStore } from '../stores/settingsStore'
 
 // Speech-level RMS threshold. Background noise typically <0.01, speech 0.05+.
 // Below this, we skip the Whisper call entirely to avoid hallucinations.
-const SPEECH_RMS_THRESHOLD = 0.02
+const SPEECH_RMS_THRESHOLD = 0.01
 
 export function useSpeechRecognition(onTranscript: (text: string) => void) {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
@@ -57,13 +57,14 @@ export function useSpeechRecognition(onTranscript: (text: string) => void) {
 
       // Skip if no speech-level audio detected (VAD) — prevents Whisper hallucinations
       // on silence/background noise like "Thank you", "Thanks for watching", etc.
-      if (maxRms < SPEECH_RMS_THRESHOLD || blob.size < 2000) {
+      if (maxRms < SPEECH_RMS_THRESHOLD || blob.size < 1000) {
         if (shouldListenRef.current) recordAndTranscribe()
         return
       }
 
       const buffer = await blob.arrayBuffer()
       const apiKey = useSettingsStore.getState().apiKey
+      const provider = useSettingsStore.getState().provider
 
       if (!apiKey) {
         useSpeechStore.getState().setError('API key required for Whisper')
@@ -71,7 +72,7 @@ export function useSpeechRecognition(onTranscript: (text: string) => void) {
       }
 
       try {
-        const transcript = await window.electronAPI.whisperTranscribe(buffer, apiKey)
+        const transcript = await window.electronAPI.whisperTranscribe(buffer, apiKey, provider)
         if (transcript && transcript.trim()) {
           onTranscriptRef.current(transcript.trim())
         }
@@ -85,12 +86,12 @@ export function useSpeechRecognition(onTranscript: (text: string) => void) {
 
     recorder.start()
 
-    // Stop after 4 seconds to flush a complete file
+    // Stop after 6 seconds to flush a complete file
     whisperIntervalRef.current = setTimeout(() => {
       if (recorder.state === 'recording') {
         recorder.stop()
       }
-    }, 4000)
+    }, 6000)
   }, [])
 
   const startWhisper = useCallback(async () => {

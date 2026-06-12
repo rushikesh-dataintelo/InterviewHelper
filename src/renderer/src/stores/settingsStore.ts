@@ -1,8 +1,9 @@
 import { create } from 'zustand'
-import type { SystemPrompt, STTProvider, ReasoningEffort } from '../lib/types'
+import type { SystemPrompt, STTProvider, ReasoningEffort, Provider } from '../lib/types'
 
 interface SettingsState {
   apiKey: string
+  provider: Provider
   model: string
   opacity: number
   fontSize: number
@@ -15,6 +16,7 @@ interface SettingsState {
 
   loadSettings: () => Promise<void>
   setApiKey: (key: string) => void
+  setProvider: (provider: Provider) => void
   setModel: (model: string) => void
   setOpacity: (opacity: number) => void
   setFontSize: (size: number) => void
@@ -33,6 +35,7 @@ function applyFontSize(size: number) {
 
 export const useSettingsStore = create<SettingsState>((set, get) => ({
   apiKey: '',
+  provider: 'openai',
   model: 'gpt-5.4',
   opacity: 0.95,
   fontSize: 14,
@@ -50,6 +53,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     applyFontSize(fontSize)
     set({
       apiKey: settings.apiKey,
+      provider: settings.provider ?? 'openai',
       model: settings.model,
       opacity: settings.opacity,
       fontSize,
@@ -65,6 +69,11 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   setApiKey: (key) => {
     set({ apiKey: key })
     window.electronAPI.saveSettings({ apiKey: key })
+  },
+
+  setProvider: (provider) => {
+    set({ provider })
+    window.electronAPI.saveSettings({ provider })
   },
 
   setModel: (model) => {

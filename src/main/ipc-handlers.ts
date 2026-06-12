@@ -32,6 +32,7 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
     model: string;
     systemPrompt: string;
     apiKey: string;
+    provider: string;
     reasoningEffort: 'off' | 'minimal' | 'low' | 'medium' | 'high';
   }) => {
     return streamChat(mainWindow, payload)
@@ -41,14 +42,16 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
   ipcMain.handle('whisper-transcribe', async (_event, payload: {
     audioBuffer: ArrayBuffer;
     apiKey: string;
+    provider: string;
   }) => {
-    return transcribeAudio(payload.audioBuffer, payload.apiKey)
+    return transcribeAudio(payload.audioBuffer, payload.apiKey, payload.provider)
   })
 
   // Settings
   ipcMain.handle('get-settings', () => {
     return {
       apiKey: store.get('apiKey', ''),
+      provider: store.get('provider', 'openai'),
       model: store.get('model', 'gpt-5.4'),
       opacity: store.get('opacity', 0.95),
       fontSize: store.get('fontSize', 14),

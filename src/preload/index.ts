@@ -16,6 +16,7 @@ const api = {
     model: string;
     systemPrompt: string;
     apiKey: string;
+    provider: string;
     reasoningEffort: 'off' | 'minimal' | 'low' | 'medium' | 'high';
   }): Promise<void> => ipcRenderer.invoke('openai-chat', payload),
 
@@ -38,12 +39,13 @@ const api = {
   },
 
   // Whisper STT
-  whisperTranscribe: (audioBuffer: ArrayBuffer, apiKey: string): Promise<string> =>
-    ipcRenderer.invoke('whisper-transcribe', { audioBuffer, apiKey }),
+  whisperTranscribe: (audioBuffer: ArrayBuffer, apiKey: string, provider: string): Promise<string> =>
+    ipcRenderer.invoke('whisper-transcribe', { audioBuffer, apiKey, provider }),
 
   // Settings
   getSettings: (): Promise<{
     apiKey: string;
+    provider: 'openai' | 'groq';
     model: string;
     opacity: number;
     fontSize: number;

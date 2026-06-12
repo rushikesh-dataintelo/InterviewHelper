@@ -12,6 +12,7 @@ interface SystemPrompt {
 
 interface StoreSchema {
   apiKey: string
+  provider: 'openai' | 'groq'
   model: string
   opacity: number
   fontSize: number
@@ -80,6 +81,7 @@ Rules:
 export const store = new Store<StoreSchema>({
   defaults: {
     apiKey: '',
+    provider: 'openai',
     model: 'gpt-5.4',
     opacity: 0.95,
     fontSize: 14,
